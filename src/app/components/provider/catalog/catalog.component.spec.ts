@@ -77,7 +77,7 @@ describe('CoreCatalogComponent', () => {
 
   describe('ngOnInit', () => {
     it('should apply initialFilter to searchTerm', () => {
-      component.initialFilter = 'mySearch';
+      fixture.componentRef.setInput('initialFilter', 'mySearch');
       component.ngOnInit();
       expect(component.searchTerm).toBe('mySearch');
     });
@@ -87,7 +87,7 @@ describe('CoreCatalogComponent', () => {
         { title: 'Item 1', description: 'Description 1' },
         { title: 'Item 2', description: 'Description 2' },
       ];
-      component.enableSuggestions = true;
+      fixture.componentRef.setInput('enableSuggestions', true);
       component.ngOnInit();
       expect(component.suggestions).toEqual([
         { value: 'Item 1' },
@@ -97,14 +97,14 @@ describe('CoreCatalogComponent', () => {
 
     it('should not populate suggestions when enableSuggestions is false', () => {
       component.data = [{ title: 'Item 1' }];
-      component.enableSuggestions = false;
+      fixture.componentRef.setInput('enableSuggestions', false);
       component.ngOnInit();
       expect(component.suggestions).toEqual([]);
     });
 
     it('should populate categories and providers when filterHeader is true', () => {
       component.data = [];
-      component.filterHeader = true;
+      fixture.componentRef.setInput('filterHeader', true);
       component.ngOnInit();
       expect(component.categories).toContain('All');
       expect(Array.isArray(component.providers)).toBe(true);

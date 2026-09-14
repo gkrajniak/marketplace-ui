@@ -46,7 +46,7 @@
                 "input": "./node_modules/fundamental-styles/dist/theming/",
                 "output": "./assets/fundamental-styles-theming/"
               },
-{
+              {
                 "glob": "**/*",
                 "input": "./node_modules/@sap-theming/theming-base-content/content/Base/baseLib/baseTheme/fonts/",
                 "output": "./assets/theming-base/baseTheme/fonts/"

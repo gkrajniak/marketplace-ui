@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import {
   IllustratedMessageActionsComponent,
   IllustratedMessageComponent,
@@ -22,7 +22,7 @@ export class EmptyCatalogComponent {
   /**
    * The title of the empty catalog
    */
-  @Input() title: string | undefined;
+  readonly title = input<string>();
 
   sceneConfig = {
     scene: {

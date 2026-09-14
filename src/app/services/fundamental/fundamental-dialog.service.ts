@@ -14,11 +14,12 @@ import { LuigiDialogUtil } from 'services/luigi';
   providedIn: 'root',
 })
 export class FundamentalDialogService extends DialogService {
-  constructor(
-    private luigiDialogUtil: LuigiDialogUtil,
-    injector: Injector,
-    overlay: Overlay,
-  ) {
+  private luigiDialogUtil = inject(LuigiDialogUtil);
+
+  constructor() {
+    const injector = inject(Injector);
+    const overlay = inject(Overlay);
+
     super(
       inject(DIALOG_DEFAULT_CONFIG, { optional: true })!,
       inject(RtlService, { optional: true })!,

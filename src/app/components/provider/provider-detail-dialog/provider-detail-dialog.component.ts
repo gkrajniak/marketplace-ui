@@ -5,6 +5,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  inject,
 } from '@angular/core';
 import {
   ButtonComponent,
@@ -86,6 +87,11 @@ import { triggerMatomoEvent } from 'utils/helpers';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProviderDetailDialogComponent implements OnInit, OnDestroy {
+  private store = inject<Store<ProviderState>>(Store);
+  private luigiClient = inject(LuigiClient);
+  private contextService = inject(PmLuigiContextService);
+  private providerService = inject(ProviderService);
+
   marketplaceEntryObservable: Observable<MarketplaceEntry>;
   marketplaceEntriesObservable: Observable<readonly MarketplaceEntry[]>;
   providerSubscription?: Subscription;
@@ -100,12 +106,7 @@ export class ProviderDetailDialogComponent implements OnInit, OnDestroy {
   userIsProviderAdmin = false;
   private context: NodeContext | undefined;
 
-  constructor(
-    private store: Store<ProviderState>,
-    private luigiClient: LuigiClient,
-    private contextService: PmLuigiContextService,
-    private providerService: ProviderService,
-  ) {
+  constructor() {
     this.marketplaceEntriesObservable = this.store.select(selectAllProviders);
     this.marketplaceEntryObservable = combineLatest([
       this.contextService.contextObservable(),

@@ -14,10 +14,11 @@ import { LuigiDialogUtil } from 'services/luigi';
   providedIn: 'root',
 })
 export class FundamentalMessageBoxService extends MessageBoxService {
-  constructor(
-    private luigiDialogUtil: LuigiDialogUtil,
-    overlay: Overlay,
-  ) {
+  private luigiDialogUtil = inject(LuigiDialogUtil);
+
+  constructor() {
+    const overlay = inject(Overlay);
+
     super(
       inject(MESSAGE_BOX_DEFAULT_CONFIG, { optional: true })!,
       inject(RtlService, { optional: true })!,

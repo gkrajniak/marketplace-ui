@@ -83,7 +83,9 @@
         <fd-facet>
           <app-provider-verification
             [verificationInfo]="
-              marketplaceEntry?.spec?.providerMetadata?.spec?.verification
+              $safeNavigationMigration(
+                marketplaceEntry?.spec?.providerMetadata?.spec?.verification
+              )
             "
           />
         </fd-facet>

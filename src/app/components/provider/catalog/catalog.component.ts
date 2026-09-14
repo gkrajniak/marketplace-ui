@@ -9,13 +9,13 @@ import {
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   Input,
   OnChanges,
   OnInit,
-  Output,
   SimpleChanges,
+  inject,
   input,
+  output,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ParamMap } from '@angular/router';
@@ -71,6 +71,8 @@ import { ProvidersUtils } from 'services/providers.utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CatalogComponent implements OnInit, OnChanges {
+  private route = inject(ActivatedRoute);
+
   readonly title = input('Catalog', {
     transform: (value: undefined | string) => value ?? 'Catalog',
   });
@@ -78,7 +80,7 @@ export class CatalogComponent implements OnInit, OnChanges {
   /**
    * Subtitle text displayed below the catalog title.
    */
-  @Input() subtitle?: string;
+  readonly subtitle = input<string>();
 
   /**
    * List of catalog items to display.
@@ -88,38 +90,38 @@ export class CatalogComponent implements OnInit, OnChanges {
   /**
    * Placeholder text for the search input field.
    */
-  @Input() searchPlaceholder = 'Search';
+  readonly searchPlaceholder = input('Search');
 
   /**
    * Disables the search input field when set to `true`.
    */
-  @Input() disableSearch = false;
+  readonly disableSearch = input(false);
 
   /**
    * Initial search filter value.
    */
-  @Input() initialFilter = '';
+  readonly initialFilter = input('');
 
   /**
    * Determines whether the category and provider filters should be displayed.
    */
-  @Input() filterHeader = false;
+  readonly filterHeader = input(false);
 
   /**
    * Title displayed when no search results are found.
    */
-  @Input() noItemsFoundTitle = 'No results found';
+  readonly noItemsFoundTitle = input('No results found');
 
   /**
    * Enables suggestions when typing in the search input.
    */
-  @Input() enableSuggestions = false;
+  readonly enableSuggestions = input(false);
 
   /**
    * If `true`, sorts the catalog items alphabetically.
    * Otherwise, items are sorted by installation status.
    */
-  @Input() sortAlphabetically = false;
+  readonly sortAlphabetically = input(false);
 
   /**
    * Filters catalog items based on the provided info label filters.
@@ -130,15 +132,15 @@ export class CatalogComponent implements OnInit, OnChanges {
    * Emits when an item in the catalog is clicked.
    * The event payload is the clicked item.
    */
-  @Output() readonly itemClicked = new EventEmitter<CatalogDataItem>();
+  readonly itemClicked = output<CatalogDataItem>();
 
   /**
    * Emits when the search input value changes.
    * The event payload is the updated search term.
    */
-  @Output() readonly inputChanged = new EventEmitter<string>();
+  readonly inputChanged = output<string>();
 
-  constructor(private route: ActivatedRoute) {
+  constructor() {
     this.route.queryParamMap
       .pipe(takeUntilDestroyed())
       .subscribe((queryParams: ParamMap) => {
@@ -179,12 +181,12 @@ export class CatalogComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-    this.searchTerm = this.initialFilter;
+    this.searchTerm = this.initialFilter();
     this.filterData();
-    if (this.enableSuggestions) {
+    if (this.enableSuggestions()) {
       this.createSuggestions();
     }
-    if (this.filterHeader) {
+    if (this.filterHeader()) {
       this.categories = CategoriesUtils.getCategories(this.data);
       this.providers = ProvidersUtils.getProviders(this.data);
     }
@@ -192,7 +194,7 @@ export class CatalogComponent implements OnInit, OnChanges {
 
   private filterData() {
     let filteredData: CatalogDataItem[] = [...this.data];
-    if (this.sortAlphabetically) {
+    if (this.sortAlphabetically()) {
       filteredData = getSortedDataByTitle(filteredData);
     } else {
       filteredData = getSortedDataByInstallStatus(filteredData);

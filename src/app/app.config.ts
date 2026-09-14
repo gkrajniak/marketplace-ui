@@ -4,6 +4,7 @@ import { initializeMatomo } from './initialize-matomo';
 import {
   provideHttpClient,
   withInterceptorsFromDi,
+  withXhr,
 } from '@angular/common/http';
 import {
   ApplicationConfig,
@@ -74,7 +75,7 @@ export const appConfig: ApplicationConfig = {
     provideTheming({ themeQueryParam: 'sap-theme' }),
     provideDialogService(),
     { provide: ENV, useValue: environment },
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withXhr(), withInterceptorsFromDi()),
     provideNoopAnimations(),
     provideAppInitializer(() => {
       initializeMatomo();

@@ -3,7 +3,7 @@ import {
   retrievedProviderMetadata,
 } from './provider-metadata.action';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { from, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
@@ -14,6 +14,10 @@ import { retrievedProviders } from 'state/providers.actions';
 
 @Injectable({ providedIn: 'root' })
 export class ProviderMetadataEffects {
+  private actions = inject(Actions);
+  private graphqlService = inject(GraphqlService);
+  private providerService = inject(ProviderService);
+
   loadProviderMetadata = createEffect(() =>
     this.actions.pipe(ofType(loadProviderMetadata)).pipe(
       switchMap(({ providerName }) => {
@@ -67,10 +71,4 @@ export class ProviderMetadataEffects {
       }),
     ),
   );
-
-  constructor(
-    private actions: Actions,
-    private graphqlService: GraphqlService,
-    private providerService: ProviderService,
-  ) {}
 }

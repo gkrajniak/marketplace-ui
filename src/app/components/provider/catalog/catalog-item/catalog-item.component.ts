@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import {
   CardComponent,
   CardContentComponent,
@@ -33,15 +33,15 @@ import { Md5 } from 'ts-md5';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CatalogItemComponent {
-  @Input()
-  data!: CatalogDataItem;
+  readonly data = input.required<CatalogDataItem>();
 
   generateId(): string {
-    if (this.data.image) {
-      return Md5.hashStr(this.data.image);
+    const data = this.data();
+    if (data.image) {
+      return Md5.hashStr(data.image);
     }
-    if (this.data.glyph) {
-      return this.data.glyph;
+    if (data.glyph) {
+      return data.glyph;
     }
     return 'no-icon';
   }

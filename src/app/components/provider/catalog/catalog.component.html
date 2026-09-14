@@ -3,16 +3,16 @@
     <fd-layout-panel-header>
       <fd-layout-panel-head>
         <h1 class="header" fd-layout-panel-title>{{ title() }}</h1>
-        @if (subtitle) {
+        @if (subtitle()) {
           <fd-layout-panel-description>{{
-            subtitle
+            subtitle()
           }}</fd-layout-panel-description>
         }
       </fd-layout-panel-head>
     </fd-layout-panel-header>
     <fd-layout-panel-body class="catalog-page-header-body">
       <div class="catalog-page-header-filter-wrapper">
-        @if (filterHeader) {
+        @if (filterHeader()) {
           <div class="catalog-page-header-filter">
             <label fd-form-label>Category</label>
             <fdp-select
@@ -39,14 +39,14 @@
         }
 
         <div class="search">
-          @if (!disableSearch) {
+          @if (!disableSearch()) {
             <fdp-search-field
               contentDensity="compact"
               data-testid="ngx-utilities-search-input"
               fd-initial-focus="true"
               [disableRefresh]="true"
-              [inputText]="initialFilter"
-              [placeholder]="searchPlaceholder"
+              [inputText]="initialFilter()"
+              [placeholder]="searchPlaceholder()"
               i18n-placeholder="
                 search field placeholder|Search field on the Catalog
               "
@@ -77,5 +77,5 @@
     }
   </div>
 } @else {
-  <app-empty-catalog [title]="noItemsFoundTitle" />
+  <app-empty-catalog [title]="noItemsFoundTitle()" />
 }

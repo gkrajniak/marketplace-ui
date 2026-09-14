@@ -3,7 +3,7 @@ import {
   uninstalledProviderInstanceSuccessfully,
 } from './changing-provider-instance.actions';
 import { loadProviders } from './providers.actions';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { LuigiGoBackAction } from 'models/luigi-go-back';
 import { map, mergeMap, tap } from 'rxjs/operators';
@@ -13,6 +13,11 @@ import { NotificationService } from 'services/notification.service';
 
 @Injectable({ providedIn: 'root' })
 export class ProviderInstanceEffects {
+  private actions = inject(Actions);
+  private graphqlService = inject(GraphqlService);
+  private luigiClient = inject(LuigiClient);
+  private notificationService = inject(NotificationService);
+
   unInstallProviderInstance = createEffect(() =>
     this.actions.pipe(
       ofType(unInstallProviderInstance),
@@ -43,11 +48,4 @@ export class ProviderInstanceEffects {
       map(() => loadProviders()),
     ),
   );
-
-  constructor(
-    private actions: Actions,
-    private graphqlService: GraphqlService,
-    private luigiClient: LuigiClient,
-    private notificationService: NotificationService,
-  ) {}
 }

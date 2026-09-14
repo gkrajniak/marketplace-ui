@@ -1,12 +1,12 @@
 import { LuigiClient } from './luigi-client.service';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { DialogRefBase } from '@fundamental-ngx/core/dialog';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LuigiDialogUtil {
-  constructor(private luigiClient: LuigiClient) {}
+  private luigiClient = inject(LuigiClient);
 
   /**
    * Subscribes to the dialogRef.afterClosed observable to add / remove the backdrops

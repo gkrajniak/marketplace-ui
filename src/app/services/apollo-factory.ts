@@ -1,5 +1,5 @@
-import { Injectable, NgZone, inject } from '@angular/core';
 import { HttpHeaders } from '@angular/common/http';
+import { Injectable, NgZone, inject } from '@angular/core';
 import {
   ApolloClient,
   ApolloLink,
@@ -22,7 +22,9 @@ class SSELink extends ApolloLink {
     this.client = createClient(options);
   }
 
-  public override request(operation: ApolloLink.Operation): ApolloObservable<ApolloLink.Result> {
+  public override request(
+    operation: ApolloLink.Operation,
+  ): ApolloObservable<ApolloLink.Result> {
     return new ApolloObservable((sink) => {
       return this.client.subscribe(
         { ...operation, query: print(operation.query) },
@@ -112,7 +114,6 @@ export class ApolloFactory {
       cache,
     };
   }
-
 
   private createMarketplaceApolloOptions(
     nodeContext: NodeContext,

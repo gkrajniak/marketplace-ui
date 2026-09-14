@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MessageBoxRef, MessageBoxService } from '@fundamental-ngx/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
@@ -15,13 +15,11 @@ import { prettifyErrorMessage } from 'utils/helpers';
 
 @Injectable({ providedIn: 'root' })
 export class CommonEffects {
-  constructor(
-    private actions: Actions,
-    private messageBoxService: MessageBoxService,
-    private notificationService: NotificationService,
-    private store: Store,
-    private luigiClient: LuigiClient,
-  ) {}
+  private actions = inject(Actions);
+  private messageBoxService = inject(MessageBoxService);
+  private notificationService = inject(NotificationService);
+  private store = inject(Store);
+  private luigiClient = inject(LuigiClient);
 
   resourceRequestFailed = createEffect(
     () =>

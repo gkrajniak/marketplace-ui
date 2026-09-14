@@ -1,15 +1,15 @@
 <fd-card
   data-analytics-id="catalog-item"
-  [attr.data-testid]="data.testId"
-  [badge]="data.badge?.text || ''"
-  [badgeStatus]="data.badge?.status || 'informative'"
+  [attr.data-testid]="data().testId"
+  [badge]="data().badge?.text || ''"
+  [badgeStatus]="data().badge?.status || 'informative'"
   [tabindex]="0"
 >
   <fd-card-header>
     <fd-card-main-header>
-      @if (data.labels) {
+      @if (data().labels) {
         <div class="fd-card__labels">
-          @for (label of data.labels; track label.title) {
+          @for (label of data().labels; track label.title) {
             <span>
               <fd-info-label
                 class="fd-card__label"
@@ -25,28 +25,28 @@
       }
       <fd-avatar
         size="s"
-        [glyph]="data.glyph || ''"
+        [glyph]="data().glyph || ''"
         [id]="generateId()"
-        [image]="data.image || ''"
+        [image]="data().image || ''"
         [transparent]="true"
       />
       <h2
         class="clamp fd-card__title--clamp"
         fd-card-title
-        [title]="data.title"
+        [title]="data().title"
       >
-        {{ data.title }}
-        <app-provider-verification [verificationInfo]="data.verification" />
+        {{ data().title }}
+        <app-provider-verification [verificationInfo]="data().verification" />
       </h2>
     </fd-card-main-header>
   </fd-card-header>
   <fd-card-content>
-    <div class="clamp fd-card__description--clamp" [title]="data.description">
-      {{ data.description }}
+    <div class="clamp fd-card__description--clamp" [title]="data().description">
+      {{ data().description }}
     </div>
 
     <div class="fd-card__content-container">
-      @for (item of data.additionalInfo; track item.value) {
+      @for (item of data().additionalInfo; track item.value) {
         <div class="fd-card__content-group">
           <label fd-form-label [colon]="true">{{ item.label }}</label>
           <fd-text [maxLines]="2" [text]="item.value" />

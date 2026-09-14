@@ -1,19 +1,20 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
 import { MessageBoxService } from '@fundamental-ngx/core';
 import { Actions } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { createMockStore } from '@ngrx/store/testing';
-import { MockProxy, mock } from 'vitest-mock-extended';
 import { LuigiGoBackAction } from 'models/luigi-go-back';
 import { of } from 'rxjs';
+import { LuigiClient } from 'services/luigi';
+import { NotificationService } from 'services/notification.service';
 import {
   goBackAction,
   requestFailed,
   showConfirmation,
 } from 'state/common.action';
 import { CommonEffects } from 'state/common.effects';
-import { LuigiClient } from 'services/luigi';
-import { NotificationService } from 'services/notification.service';
+import { MockProxy, mock } from 'vitest-mock-extended';
 
 describe('CommonEffects', () => {
   let luigiClient: MockProxy<LuigiClient>;
@@ -35,18 +36,24 @@ describe('CommonEffects', () => {
   });
 
   function createEffects(action: Action) {
-    return new CommonEffects(
-      new Actions(of(action)),
-      messageBoxService,
-      notificationService,
-      mockStore,
-      luigiClient,
-    );
+    TestBed.configureTestingModule({
+      providers: [
+        CommonEffects,
+        { provide: Actions, useValue: new Actions(of(action)) },
+        { provide: MessageBoxService, useValue: messageBoxService },
+        { provide: NotificationService, useValue: notificationService },
+        { provide: Store, useValue: mockStore },
+        { provide: LuigiClient, useValue: luigiClient },
+      ],
+    });
+    return TestBed.inject(CommonEffects);
   }
 
   describe('resourceRequestFailed', () => {
     it('should open a message box with the dialog title on failed requests', () => {
-      const error = mock<HttpErrorResponse>({ message: 'Something went wrong' });
+      const error = mock<HttpErrorResponse>({
+        message: 'Something went wrong',
+      });
       const dialogTitle = 'Error Dialog Title';
       const action = requestFailed({ error, goBack: false, dialogTitle });
 
@@ -60,8 +67,15 @@ describe('CommonEffects', () => {
     });
 
     it('should use inner error.message when error.error is present', () => {
-      const error = new HttpErrorResponse({ error: { message: 'Inner error message' }, status: 400 });
-      const action = requestFailed({ error, goBack: false, dialogTitle: 'Title' });
+      const error = new HttpErrorResponse({
+        error: { message: 'Inner error message' },
+        status: 400,
+      });
+      const action = requestFailed({
+        error,
+        goBack: false,
+        dialogTitle: 'Title',
+      });
 
       const effects = createEffects(action);
       effects.resourceRequestFailed.subscribe();
@@ -74,7 +88,11 @@ describe('CommonEffects', () => {
 
     it('should dispatch goBackAction and close message box when approveButtonCallback is called with goBack=true', () => {
       const error = mock<HttpErrorResponse>({ message: 'Error' });
-      const action = requestFailed({ error, goBack: true, dialogTitle: 'Title' });
+      const action = requestFailed({
+        error,
+        goBack: true,
+        dialogTitle: 'Title',
+      });
 
       const closeMock = vi.fn();
       let approveButtonCallback: (() => void) | undefined;
@@ -86,13 +104,7 @@ describe('CommonEffects', () => {
 
       const dispatchSpy = vi.spyOn(mockStore, 'dispatch');
 
-      const effects = new CommonEffects(
-        new Actions(of(action)),
-        messageBoxService,
-        notificationService,
-        mockStore,
-        luigiClient,
-      );
+      const effects = createEffects(action);
       effects.resourceRequestFailed.subscribe();
 
       approveButtonCallback!();
@@ -105,7 +117,11 @@ describe('CommonEffects', () => {
 
     it('should only close message box when approveButtonCallback is called with goBack=false', () => {
       const error = mock<HttpErrorResponse>({ message: 'Error' });
-      const action = requestFailed({ error, goBack: false, dialogTitle: 'Title' });
+      const action = requestFailed({
+        error,
+        goBack: false,
+        dialogTitle: 'Title',
+      });
 
       const closeMock = vi.fn();
       let approveButtonCallback: (() => void) | undefined;
@@ -134,7 +150,9 @@ describe('CommonEffects', () => {
       const effects = createEffects(action);
       effects.showConfirmation.subscribe();
 
-      expect(notificationService.openSuccessToast).toHaveBeenCalledWith('Operation successful');
+      expect(notificationService.openSuccessToast).toHaveBeenCalledWith(
+        'Operation successful',
+      );
     });
   });
 
@@ -142,7 +160,9 @@ describe('CommonEffects', () => {
     it('should call linkManager().goBack with the action', () => {
       const goBackMock = vi.fn();
       luigiClient.linkManager.mockReturnValue({ goBack: goBackMock } as any);
-      const action = goBackAction({ action: LuigiGoBackAction.RESOURCE_ACCOUNT_EDITED });
+      const action = goBackAction({
+        action: LuigiGoBackAction.RESOURCE_ACCOUNT_EDITED,
+      });
 
       const effects = createEffects(action);
       effects.goBack.subscribe();

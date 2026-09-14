@@ -1,5 +1,15 @@
 /* Add SAP-icons required by SAP Fundamental Styles */
 @font-face {
+  font-family: 'SAP-icons';
+  src: url('@sap-theming/theming-base-content/content/Base/baseLib/sap_horizon/fonts/SAP-icons.woff2')
+      format('woff2'),
+    url('@sap-theming/theming-base-content/content/Base/baseLib/sap_horizon/fonts/SAP-icons.woff')
+      format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
   font-family: 'BusinessSuiteInAppSymbols';
   src: url('@sap-theming/theming-base-content/content/Base/baseLib/baseTheme/fonts/BusinessSuiteInAppSymbols.woff')
     format('woff');

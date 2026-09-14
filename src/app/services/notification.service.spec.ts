@@ -2,6 +2,7 @@ import {
   DEFAULT_TOAST_CLOSE_AFTER,
   NotificationService,
 } from './notification.service';
+import { TestBed } from '@angular/core/testing';
 import { UxManager } from '@luigi-project/client';
 import { LuigiClient } from 'services/luigi';
 import { mock } from 'vitest-mock-extended';
@@ -11,7 +12,17 @@ describe('NotificationService', () => {
   const luigiClient = mock<LuigiClient>({
     uxManager: () => mock<UxManager>({ showAlert: showAlertMock }),
   });
-  const service = new NotificationService(luigiClient);
+  let service: NotificationService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        NotificationService,
+        { provide: LuigiClient, useValue: luigiClient },
+      ],
+    });
+    service = TestBed.inject(NotificationService);
+  });
 
   afterEach(() => vi.resetAllMocks());
 

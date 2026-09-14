@@ -20,7 +20,7 @@ describe('EmptyCatalogComponent', () => {
   });
 
   it('should render the title when provided', () => {
-    component.title = 'No Results Found';
+    fixture.componentRef.setInput('title', 'No Results Found');
     fixture.detectChanges();
 
     const titleEl = fixture.nativeElement.querySelector(
@@ -43,7 +43,7 @@ describe('EmptyCatalogComponent', () => {
   });
 
   it('should accept title input as undefined', () => {
-    component.title = undefined;
+    fixture.componentRef.setInput('title', undefined);
     fixture.detectChanges();
     expect(component).toBeTruthy();
   });

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { AlertSettings } from '@luigi-project/client';
 import { LuigiClient } from 'services/luigi';
 
@@ -8,7 +8,7 @@ export const DEFAULT_TOAST_CLOSE_AFTER = 5000;
   providedIn: 'root',
 })
 export class NotificationService {
-  constructor(private luigiClient: LuigiClient) {}
+  private luigiClient = inject(LuigiClient);
 
   openErrorStrip(errorMessage: string): void {
     void this.luigiClient.uxManager().showAlert({

@@ -28,14 +28,14 @@ export const NEW_LABEL: Label = {
 
 @Injectable({ providedIn: 'root' })
 export class ProviderService {
+  private store = inject(Store);
+  private luigiClient = inject(LuigiClient);
+  private graphqlService = inject(GraphqlService);
+
   private readonly notificationService = inject(NotificationService);
   private readonly pmLuigiContextService = inject(PmLuigiContextService);
 
-  constructor(
-    private store: Store,
-    private luigiClient: LuigiClient,
-    private graphqlService: GraphqlService,
-  ) {
+  constructor() {
     this.handleInstallProvider();
   }
 

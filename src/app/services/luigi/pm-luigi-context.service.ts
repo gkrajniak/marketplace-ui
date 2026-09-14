@@ -1,5 +1,5 @@
 import { ENV, Environment, NodeContext } from '../../models';
-import { Injectable, Injector, Signal } from '@angular/core';
+import { Injectable, Injector, Signal, inject } from '@angular/core';
 import {
   ILuigiContextTypes,
   LuigiContextService,
@@ -18,13 +18,22 @@ export interface IContextMessage {
   providedIn: 'root',
 })
 export class PmLuigiContextService extends LuigiContextService {
+  private injector = inject(Injector);
+
   private luigiContextService: LuigiContextServiceImpl;
   private readonly env: Environment;
 
-  constructor(private injector: Injector) {
+  override readonly contextSignal: Signal<IContextMessage | undefined>;
+
+  constructor() {
     super();
+    const injector = this.injector;
+
     this.luigiContextService = injector.get(LuigiContextServiceImpl);
     this.env = injector.get(ENV, {});
+    this.contextSignal = this.luigiContextService.contextSignal as Signal<
+      IContextMessage | undefined
+    >;
   }
 
   /**
@@ -36,10 +45,6 @@ export class PmLuigiContextService extends LuigiContextService {
    */
   setContext(context: NodeContext): void {
     this.luigiContextService.addListener(ILuigiContextTypes.UPDATE, context);
-  }
-
-  contextSignal(): Signal<IContextMessage | undefined> {
-    return this.luigiContextService.contextSignal() as Signal<IContextMessage | undefined>;
   }
 
   getContext(): NodeContext {

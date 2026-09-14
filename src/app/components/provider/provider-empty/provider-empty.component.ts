@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import {
   IllustratedMessageActionsComponent,
   IllustratedMessageComponent,
@@ -21,8 +21,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProviderEmptyComponent {
-  @Input({ required: true }) title!: string;
-  @Input() msg: string | undefined;
+  readonly title = input.required<string>();
+  readonly msg = input<string>();
 
   sceneConfig = {
     scene: {

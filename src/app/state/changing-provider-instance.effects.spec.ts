@@ -1,18 +1,19 @@
-import { ProviderInstanceEffects } from './changing-provider-instance.effects';
 import {
   unInstallProviderInstance,
   uninstalledProviderInstanceSuccessfully,
 } from './changing-provider-instance.actions';
+import { ProviderInstanceEffects } from './changing-provider-instance.effects';
 import { loadProviders } from './providers.actions';
+import { TestBed } from '@angular/core/testing';
+import { Actions } from '@ngrx/effects';
 import { Action } from '@ngrx/store';
-import { MockProxy, mock } from 'vitest-mock-extended';
+import { MockStore, createMockStore } from '@ngrx/store/testing';
 import { LuigiGoBackAction } from 'models/luigi-go-back';
 import { of } from 'rxjs';
 import { GraphqlService } from 'services/graphql.service';
 import { LuigiClient } from 'services/luigi';
 import { NotificationService } from 'services/notification.service';
-import { Actions } from '@ngrx/effects';
-import { createMockStore, MockStore } from '@ngrx/store/testing';
+import { MockProxy, mock } from 'vitest-mock-extended';
 
 describe('ProviderInstanceEffects', () => {
   let mockStore: MockStore;
@@ -36,12 +37,16 @@ describe('ProviderInstanceEffects', () => {
   });
 
   function createEffects(action: Action) {
-    return new ProviderInstanceEffects(
-      new Actions(of(action)),
-      graphqlService,
-      luigiClient,
-      notificationService,
-    );
+    TestBed.configureTestingModule({
+      providers: [
+        ProviderInstanceEffects,
+        { provide: Actions, useValue: new Actions(of(action)) },
+        { provide: GraphqlService, useValue: graphqlService },
+        { provide: LuigiClient, useValue: luigiClient },
+        { provide: NotificationService, useValue: notificationService },
+      ],
+    });
+    return TestBed.inject(ProviderInstanceEffects);
   }
 
   describe('unInstallProviderInstance', () => {
@@ -55,7 +60,9 @@ describe('ProviderInstanceEffects', () => {
       let emittedAction: Action | undefined;
       effects.unInstallProviderInstance.subscribe((a) => (emittedAction = a));
 
-      expect(graphqlService.unInstallExtension).toHaveBeenCalledWith(providerName);
+      expect(graphqlService.unInstallExtension).toHaveBeenCalledWith(
+        providerName,
+      );
       expect(emittedAction).toEqual(
         uninstalledProviderInstanceSuccessfully({ providerName }),
       );
@@ -69,7 +76,9 @@ describe('ProviderInstanceEffects', () => {
 
       const effects = createEffects(action);
       let emittedAction: Action | undefined;
-      effects.uninstallCompleteSuccessfully.subscribe((a) => (emittedAction = a));
+      effects.uninstallCompleteSuccessfully.subscribe(
+        (a) => (emittedAction = a),
+      );
 
       expect(notificationService.openSuccessToast).toHaveBeenCalledWith(
         'Provider Instance Uninstalled',

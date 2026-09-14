@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ThemingService } from '@fundamental-ngx/core';
 
@@ -10,7 +10,9 @@ import { ThemingService } from '@fundamental-ngx/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
-  constructor(themingService: ThemingService) {
+  constructor() {
+    const themingService = inject(ThemingService);
+
     themingService.init();
   }
 }

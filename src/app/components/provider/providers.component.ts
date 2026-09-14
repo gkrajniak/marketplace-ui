@@ -1,6 +1,11 @@
 import { ProviderEmptyComponent } from './provider-empty/provider-empty.component';
 import { AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { LinkComponent } from '@fundamental-ngx/core/link';
 import {
   DynamicPageComponent,
@@ -52,18 +57,18 @@ export interface ProviderCatalogDataItem extends CatalogDataItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProvidersComponent implements OnInit {
+  private store = inject<Store<ProviderState>>(Store);
+  private providerService = inject(ProviderService);
+  private luigiClient = inject(LuigiClient);
+  private pmLuigiContextService = inject(PmLuigiContextService);
+
   initialFilter?: string;
   isLoading: Subject<boolean> = new BehaviorSubject(true);
   installableProviders: Observable<ProviderCatalogDataItem[]>;
   private entityId?: string;
   private entityType?: string;
 
-  constructor(
-    private store: Store<ProviderState>,
-    private providerService: ProviderService,
-    private luigiClient: LuigiClient,
-    private pmLuigiContextService: PmLuigiContextService,
-  ) {
+  constructor() {
     this.pmLuigiContextService.contextObservable().subscribe(() => {
       this.store.dispatch(loadProviders());
     });

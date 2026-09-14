@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { firstValueFrom, from, of } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 import { PmLuigiContextService } from 'services/luigi';
@@ -17,7 +17,7 @@ interface MatomoConfig {
   providedIn: 'root',
 })
 export class AnalyticsTrackerService {
-  constructor(private luigiContextService: PmLuigiContextService) {}
+  private luigiContextService = inject(PmLuigiContextService);
 
   public async injectScript(useMatomoId = false) {
     const config = await firstValueFrom(

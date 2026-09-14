@@ -1,14 +1,18 @@
 import { loadProviders, retrievedProviders } from './providers.actions';
 import { ProvidersEffects } from './providers.effects';
+import { TestBed } from '@angular/core/testing';
 import { Actions } from '@ngrx/effects';
 import { Action } from '@ngrx/store';
-import { createMockStore, MockStore } from '@ngrx/store/testing';
-import { MockProxy, mock } from 'vitest-mock-extended';
+import { MockStore, createMockStore } from '@ngrx/store/testing';
 import { MarketplaceEntry } from 'models/index';
-import { of, ReplaySubject, EMPTY, Observable } from 'rxjs';
+import { EMPTY, Observable, ReplaySubject, of } from 'rxjs';
 import { GraphqlService } from 'services/graphql.service';
+import { MockProxy, mock } from 'vitest-mock-extended';
 
-const buildMarketplaceEntry = (name: string, apiBindingName?: string): MarketplaceEntry => ({
+const buildMarketplaceEntry = (
+  name: string,
+  apiBindingName?: string,
+): MarketplaceEntry => ({
   metadata: { name },
   spec: {
     apiBindingName,
@@ -45,10 +49,14 @@ describe('ProvidersEffects', () => {
   });
 
   function createEffectsInstance() {
-    return new ProvidersEffects(
-      new Actions(actionsSubject),
-      graphqlService,
-    );
+    TestBed.configureTestingModule({
+      providers: [
+        ProvidersEffects,
+        { provide: Actions, useValue: new Actions(actionsSubject) },
+        { provide: GraphqlService, useValue: graphqlService },
+      ],
+    });
+    return TestBed.inject(ProvidersEffects);
   }
 
   describe('loadProviders', () => {
@@ -111,8 +119,12 @@ describe('ProvidersEffects', () => {
       actionsSubject.next(loadProviders());
 
       expect(emittedActions).toHaveLength(2);
-      expect(emittedActions[0]).toEqual(retrievedProviders({ providers: providers1 }));
-      expect(emittedActions[1]).toEqual(retrievedProviders({ providers: providers2 }));
+      expect(emittedActions[0]).toEqual(
+        retrievedProviders({ providers: providers1 }),
+      );
+      expect(emittedActions[1]).toEqual(
+        retrievedProviders({ providers: providers2 }),
+      );
 
       subscription.unsubscribe();
     });
