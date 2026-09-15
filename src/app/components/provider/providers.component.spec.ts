@@ -62,6 +62,7 @@ describe('ExtensionAllComponent', () => {
         MockProvider(ProviderService, {
           buildLabels: vi.fn().mockReturnValue(undefined),
           getIcon: vi.fn().mockReturnValue(undefined),
+          getVerification: vi.fn().mockReturnValue(undefined),
         }),
         MockProvider(PmLuigiContextService, {
           contextObservable: vi.fn().mockReturnValue(contextSubject),

@@ -12,8 +12,10 @@ import {
   Label,
   MarketplaceEntry,
   ProviderMetadata,
+  ProviderMetadataSpecData,
   ServiceLevel,
 } from 'models/provider-metadata';
+import { VerificationInfo } from 'models/verification-info';
 import { filter, take } from 'rxjs/operators';
 import { GraphqlService } from 'services/graphql.service';
 import { NotificationService } from 'services/notification.service';
@@ -139,6 +141,19 @@ export class ProviderService {
     }
     // nothing matched so go with the deprecated image value
     return provider.spec.image ?? '';
+  }
+
+  public getVerification(provider: ProviderMetadata): VerificationInfo | undefined {
+    return this.parseSpecData(provider.spec.data)?.verification;
+  }
+
+  private parseSpecData(
+    data: string | ProviderMetadataSpecData | undefined,
+  ): ProviderMetadataSpecData | undefined {
+    if (!data) {
+      return undefined;
+    }
+    return typeof data === 'string' ? JSON.parse(data) : data;
   }
 
   navigateToProviderDetails(marketplaceEntry: MarketplaceEntry): void {

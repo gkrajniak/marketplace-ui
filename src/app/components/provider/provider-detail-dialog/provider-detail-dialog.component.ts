@@ -41,6 +41,7 @@ import {
   ProviderMetadata,
   ServiceLevel,
 } from 'models/provider-metadata';
+import { VerificationInfo } from 'models/verification-info';
 import { Observable, Subscription, combineLatest } from 'rxjs';
 import { filter, mergeMap, tap } from 'rxjs/operators';
 import { LuigiClient, PmLuigiContextService } from 'services/luigi';
@@ -207,6 +208,12 @@ export class ProviderDetailDialogComponent implements OnInit, OnDestroy {
 
   protected getIcon(extension: ProviderMetadata): string {
     return this.providerService.getIcon(extension);
+  }
+
+  protected getVerification(
+    extension: ProviderMetadata,
+  ): VerificationInfo | undefined {
+    return this.providerService.getVerification(extension);
   }
 
   protected goToExternalLink(URL: string | undefined): void {

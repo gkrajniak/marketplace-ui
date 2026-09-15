@@ -121,7 +121,7 @@ export interface ProviderMetadata {
     type?: string;
     category?: string;
 
-    data?: string | Record<string, unknown>;
+    data?: string | ProviderMetadataSpecData;
     contacts?: Contact[];
     documentation?: Documentation[];
     icon?: Icon;
@@ -138,8 +138,11 @@ export interface ProviderMetadata {
     mainLink?: Link;
     provider?: string;
     serviceLevel?: ServiceLevel;
-    verification?: VerificationInfo;
   };
+}
+
+export interface ProviderMetadataSpecData extends Record<string, unknown> {
+  verification?: VerificationInfo;
 }
 
 export interface Link {

@@ -82,11 +82,7 @@
         </fd-facet>
         <fd-facet>
           <app-provider-verification
-            [verificationInfo]="
-              $safeNavigationMigration(
-                marketplaceEntry?.spec?.providerMetadata?.spec?.verification
-              )
-            "
+            [verificationInfo]="getVerification(marketplaceEntry.spec.providerMetadata)"
           />
         </fd-facet>
 

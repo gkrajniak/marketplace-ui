@@ -47,6 +47,7 @@ describe('ProviderDetailDialogComponent', () => {
     installProviderInstance: Mock;
     uninstallProviderInstanceDialog: Mock;
     getIcon: Mock;
+    getVerification: Mock;
     navigateToProviderDetails: Mock;
     mapServiceLevel: Mock;
   };
@@ -61,6 +62,7 @@ describe('ProviderDetailDialogComponent', () => {
       installProviderInstance: vi.fn().mockReturnValue(of(null)),
       uninstallProviderInstanceDialog: vi.fn().mockResolvedValue(true),
       getIcon: vi.fn().mockReturnValue(''),
+      getVerification: vi.fn().mockReturnValue(undefined),
       navigateToProviderDetails: vi.fn(),
       mapServiceLevel: vi.fn().mockReturnValue('24x7'),
     };

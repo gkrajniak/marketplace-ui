@@ -295,6 +295,42 @@ describe('ProviderService', () => {
     });
   });
 
+  describe('getVerification', () => {
+    it('should return undefined when data is absent', () => {
+      const provider = buildProviderMetadata({});
+      expect(service.getVerification(provider)).toBeUndefined();
+    });
+
+    it('should parse verification from a JSON string data field', () => {
+      const provider = buildProviderMetadata({
+        data: JSON.stringify({
+          verification: { label: 'Verified', status: 'positive' },
+        }),
+      });
+      expect(service.getVerification(provider)).toEqual({
+        label: 'Verified',
+        status: 'positive',
+      });
+    });
+
+    it('should read verification from an already-parsed data object', () => {
+      const provider = buildProviderMetadata({
+        data: { verification: { label: 'Certified', status: 'positive' } },
+      });
+      expect(service.getVerification(provider)).toEqual({
+        label: 'Certified',
+        status: 'positive',
+      });
+    });
+
+    it('should return undefined when data has no verification', () => {
+      const provider = buildProviderMetadata({
+        data: JSON.stringify({ someOtherField: true }),
+      });
+      expect(service.getVerification(provider)).toBeUndefined();
+    });
+  });
+
   describe('navigateToProviderDetails', () => {
     it('should open the provider as a sibling in the current marketplace', () => {
       service.navigateToProviderDetails(
