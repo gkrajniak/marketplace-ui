@@ -85,6 +85,7 @@ const mockMarketplaceEntry: MarketplaceEntry = {
       spec: {
         displayName: 'Test Provider',
         description: 'A test provider',
+        tags: [],
       },
     },
   },

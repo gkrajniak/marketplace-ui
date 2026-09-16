@@ -27,6 +27,7 @@ const buildMarketplaceEntry = (
       spec: {
         displayName: `${name} display`,
         description: `${name} description`,
+        tags: [],
       },
     },
   },

@@ -6,7 +6,7 @@
     [autoResponsive]="false"
   >
     <fdp-dynamic-page-title
-      [subtitle]="marketplaceEntry.spec.providerMetadata.spec.category || ''"
+      [subtitle]="getCategory(marketplaceEntry.spec.providerMetadata) || ''"
       [title]="marketplaceEntry.spec.providerMetadata.spec.displayName"
     >
       @if (showInstalledLabel()) {
@@ -16,7 +16,8 @@
       }
       <fdp-dynamic-page-global-actions>
         <fd-toolbar fdType="transparent" [clearBorder]="true">
-          @if (marketplaceEntry.spec.providerMetadata.spec.mainLink) {
+          @let mainLink = getMainLink(marketplaceEntry.spec.providerMetadata);
+          @if (mainLink) {
             <span>
               <button
                 fd-button
@@ -24,11 +25,7 @@
                 glyph="action"
                 label="Open"
                 [fdType]="userIsProviderAdmin ? '' : 'emphasized'"
-                (click)="
-                  goToExternalLink(
-                    marketplaceEntry.spec.providerMetadata.spec.mainLink.url
-                  )
-                "
+                (click)="goToExternalLink(mainLink.url)"
               ></button>
             </span>
           }
@@ -87,10 +84,8 @@
         </fd-facet>
 
         <fd-facet class="label-container" type="custom">
-          @for (
-            label of marketplaceEntry.spec.providerMetadata.spec.labels;
-            track label.title
-          ) {
+          @let labels = getLabels(marketplaceEntry.spec.providerMetadata);
+          @for (label of labels; track label.title) {
             <fd-info-label
               class="info-label"
               type="icon"

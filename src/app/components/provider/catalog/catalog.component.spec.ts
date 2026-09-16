@@ -1,15 +1,27 @@
 import { CatalogComponent } from './catalog.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, ParamMap, convertToParamMap } from '@angular/router';
-import { CatalogDataItem } from 'models/index';
-import { of } from 'rxjs';
+import { ILuigiContextTypes } from '@luigi-project/client-support-angular';
+import { CatalogDataItem, NodeContext, UiConfigFilter } from 'models/index';
+import { MockProvider } from 'ng-mocks';
+import { Subject, of } from 'rxjs';
+import { IContextMessage, PmLuigiContextService } from 'services/luigi';
 import { mock } from 'vitest-mock-extended';
 
 describe('CoreCatalogComponent', () => {
   let component: CatalogComponent;
   let fixture: ComponentFixture<CatalogComponent>;
+  let contextSubject: Subject<IContextMessage>;
+
+  const emitFilters = (filters: UiConfigFilter[]) =>
+    contextSubject.next({
+      contextType: ILuigiContextTypes.UPDATE,
+      context: { uiConfig: { filters } } as NodeContext,
+    });
 
   beforeEach(async () => {
+    contextSubject = new Subject();
+
     await TestBed.configureTestingModule({
       imports: [CatalogComponent],
       providers: [
@@ -19,6 +31,9 @@ describe('CoreCatalogComponent', () => {
             queryParamMap: of(convertToParamMap({})),
           },
         },
+        MockProvider(PmLuigiContextService, {
+          contextObservable: () => contextSubject,
+        }),
       ],
     }).compileComponents();
 
@@ -102,12 +117,94 @@ describe('CoreCatalogComponent', () => {
       expect(component.suggestions).toEqual([]);
     });
 
-    it('should populate categories and providers when filterHeader is true', () => {
+    it('should have no filters when uiConfig has none', () => {
       component.data = [];
-      fixture.componentRef.setInput('filterHeader', true);
       component.ngOnInit();
-      expect(component.categories).toContain('All');
-      expect(Array.isArray(component.providers)).toBe(true);
+      expect(component.filterConfigs).toEqual([]);
+      expect(component.filterOptions).toEqual({});
+    });
+  });
+
+  describe('uiConfig filters', () => {
+    beforeEach(() => {
+      component.data = [
+        {
+          title: 'kro',
+          providerMetadata: {
+            spec: {
+              displayName: 'kro',
+              tags: [],
+              data: { category: 'Sandbox', provider: 'kro.run' },
+            },
+          },
+        },
+        {
+          title: 'ABC',
+          providerMetadata: {
+            spec: {
+              displayName: 'ABC',
+              tags: [],
+              data: { category: 'Managed Services', provider: 'ABC Corp' },
+            },
+          },
+        },
+      ];
+    });
+
+    it('should build filter options from the uiConfig filters on context emission', () => {
+      emitFilters([
+        { label: 'Category', providerMetadataPath: 'spec.data.category' },
+        { label: 'Provider', providerMetadataPath: 'spec.data.provider' },
+      ]);
+
+      expect(component.filterConfigs).toEqual([
+        { label: 'Category', providerMetadataPath: 'spec.data.category' },
+        { label: 'Provider', providerMetadataPath: 'spec.data.provider' },
+      ]);
+      expect(component.filterOptions['Category']).toEqual([
+        { id: 'Managed Services', label: 'Managed Services' },
+        { id: 'Sandbox', label: 'Sandbox' },
+      ]);
+      expect(component.filterOptions['Provider']).toEqual([
+        { id: 'ABC Corp', label: 'ABC Corp' },
+        { id: 'kro.run', label: 'kro.run' },
+      ]);
+    });
+
+    it('should build a single filter when only one is configured', () => {
+      emitFilters([
+        { label: 'Category', providerMetadataPath: 'spec.data.category' },
+      ]);
+
+      expect(component.filterConfigs.length).toBe(1);
+      expect(Object.keys(component.filterOptions)).toEqual(['Category']);
+    });
+
+    it('should filter items by the selected value', () => {
+      emitFilters([
+        { label: 'Category', providerMetadataPath: 'spec.data.category' },
+      ]);
+
+      component.setFilter('Category', {
+        selectedItems: [{ id: 'Sandbox', label: 'Sandbox' }],
+      } as never);
+
+      expect(component.filteredData.map((item) => item.title)).toEqual([
+        'kro',
+      ]);
+    });
+
+    it('should show all items when no value is selected', () => {
+      emitFilters([
+        { label: 'Category', providerMetadataPath: 'spec.data.category' },
+      ]);
+
+      component.setFilter('Category', { selectedItems: [] } as never);
+
+      expect(component.filteredData.map((item) => item.title)).toEqual([
+        'kro',
+        'ABC',
+      ]);
     });
   });
 

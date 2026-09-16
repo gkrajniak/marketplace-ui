@@ -10,7 +10,6 @@
             searchPlaceholder="Search for a service by name, category, provider, and more"
             subtitle="From here, browse through official partner, and community Services. Select a Service to open its page for more details, enabling instructions, documentation, and support information."
             [data]="providers"
-            [filterHeader]="true"
             [initialFilter]="initialFilter ?? ''"
             (inputChanged)="writeQueryParam($event)"
             (itemClicked)="navigate($event)"

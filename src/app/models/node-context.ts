@@ -41,8 +41,18 @@ export interface NodeContext extends Record<string, any> {
   goBackContext?: GoBackContext | any;
   parentNavigationContexts: string[];
   providerName?: string;
+  uiConfig?: UiConfig;
 }
 
 export interface AnalyzerTrackingConfig {
   siteUrl?: string;
+}
+
+export interface UiConfig {
+  filters?: UiConfigFilter[];
+}
+
+export interface UiConfigFilter {
+  label: string;
+  providerMetadataPath: string;
 }

@@ -1,7 +1,7 @@
 import { ProviderDetailDialogComponent } from './provider-detail-dialog.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { MarketplaceEntry, ServiceLevel } from 'models/index';
+import { MarketplaceEntry } from 'models/index';
 import { PROVIDER_INSTANCE_INSTALLED } from 'models/luigi-go-back';
 import { MockProvider } from 'ng-mocks';
 import { Subject, of } from 'rxjs';
@@ -30,6 +30,7 @@ const buildMarketplaceEntry = (
       spec: {
         displayName: 'Test Provider',
         description: 'A test provider',
+        tags: [],
       },
     },
   },
@@ -48,6 +49,9 @@ describe('ProviderDetailDialogComponent', () => {
     uninstallProviderInstanceDialog: Mock;
     getIcon: Mock;
     getVerification: Mock;
+    getMainLink: Mock;
+    buildLabels: Mock;
+    getCategory: Mock;
     navigateToProviderDetails: Mock;
     mapServiceLevel: Mock;
   };
@@ -63,6 +67,9 @@ describe('ProviderDetailDialogComponent', () => {
       uninstallProviderInstanceDialog: vi.fn().mockResolvedValue(true),
       getIcon: vi.fn().mockReturnValue(''),
       getVerification: vi.fn().mockReturnValue(undefined),
+      getMainLink: vi.fn().mockReturnValue(undefined),
+      buildLabels: vi.fn().mockReturnValue([]),
+      getCategory: vi.fn().mockReturnValue(undefined),
       navigateToProviderDetails: vi.fn(),
       mapServiceLevel: vi.fn().mockReturnValue('24x7'),
     };
@@ -105,9 +112,9 @@ describe('ProviderDetailDialogComponent', () => {
   describe('mapServiceLevel', () => {
     it('should delegate to providerService.mapServiceLevel', () => {
       providerServiceMock.mapServiceLevel.mockReturnValue('24x7');
-      const result = component.mapServiceLevel(ServiceLevel.VeryHigh);
+      const result = component.mapServiceLevel('veryHigh24x7');
       expect(providerServiceMock.mapServiceLevel).toHaveBeenCalledWith(
-        ServiceLevel.VeryHigh,
+        'veryHigh24x7',
       );
       expect(result).toBe('24x7');
     });
@@ -154,7 +161,7 @@ describe('ProviderDetailDialogComponent', () => {
         spec: {
           apiBindingName: 'test-provider-abc12',
           apiExport: { metadata: '', spec: { permissionClaims: [] } },
-          providerMetadata: { spec: { displayName: 'Test' } },
+          providerMetadata: { spec: { displayName: 'Test', tags: [] } },
         },
       });
       expect(component['showInstalledLabel']()).toBe(true);

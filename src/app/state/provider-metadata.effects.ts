@@ -8,7 +8,6 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { from, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { GraphqlService } from 'services/graphql.service';
-import { ProviderService } from 'services/provider.service';
 import { requestFailed } from 'state/common.action';
 import { retrievedProviders } from 'state/providers.actions';
 
@@ -16,7 +15,6 @@ import { retrievedProviders } from 'state/providers.actions';
 export class ProviderMetadataEffects {
   private actions = inject(Actions);
   private graphqlService = inject(GraphqlService);
-  private providerService = inject(ProviderService);
 
   loadProviderMetadata = createEffect(() =>
     this.actions.pipe(ofType(loadProviderMetadata)).pipe(
@@ -43,13 +41,6 @@ export class ProviderMetadataEffects {
             if (!marketplaceEntry) {
               throw new Error(`Provider ${providerName} was not found`);
             }
-            const labels = this.providerService.buildLabels(
-              marketplaceEntry.spec.providerMetadata,
-            );
-            marketplaceEntry.spec.providerMetadata.spec = {
-              ...marketplaceEntry.spec.providerMetadata.spec,
-              labels,
-            };
             return { marketplaceEntry, marketplaceEntries };
           }),
           switchMap(({ marketplaceEntry, marketplaceEntries }) =>

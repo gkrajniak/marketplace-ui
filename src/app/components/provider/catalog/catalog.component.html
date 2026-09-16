@@ -12,28 +12,19 @@
     </fd-layout-panel-header>
     <fd-layout-panel-body class="catalog-page-header-body">
       <div class="catalog-page-header-filter-wrapper">
-        @if (filterHeader()) {
+        @for (filterConfig of filterConfigs; track filterConfig.label) {
           <div class="catalog-page-header-filter">
-            <label fd-form-label>Category</label>
-            <fdp-select
-              placeholder="All"
-              width="250px"
-              [list]="categories"
-              (selectionChange)="setCategoryFilter($event)"
-            />
-          </div>
-          <div class="catalog-page-header-filter">
-            <label fd-form-label>Provider</label>
+            <label fd-form-label>{{ filterConfig.label }}</label>
             <fdp-multi-combobox
               contentDensity="compact"
               displayKey="label"
               lookupKey="id"
-              name="Provider"
+              [name]="filterConfig.label"
               placeholder="All"
               [autoResize]="true"
-              [dataSource]="providers"
-              [selectedItems]="filter.providers"
-              (selectionChange)="setProvidersFilter($event)"
+              [dataSource]="filterOptions[filterConfig.label]"
+              [selectedItems]="filter[filterConfig.label]"
+              (selectionChange)="setFilter(filterConfig.label, $event)"
             />
           </div>
         }
