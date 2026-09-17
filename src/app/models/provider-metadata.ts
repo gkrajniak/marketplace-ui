@@ -77,7 +77,6 @@ export type ColorCategory =
 export interface Label {
   title: string;
   color: ColorCategory;
-  glyph?: string;
 }
 
 export interface MarketplaceEntry {
@@ -118,10 +117,9 @@ export interface ProviderMetadata {
   spec: {
     displayName: string;
     description?: string;
-    type?: string;
-    category?: string;
+    tags: string[];
 
-    data?: string | Record<string, unknown>;
+    data?: string | ProviderMetadataSpecData;
     contacts?: Contact[];
     documentation?: Documentation[];
     icon?: Icon;
@@ -134,31 +132,24 @@ export interface ProviderMetadata {
     // not supported yet
     image?: string; // data:image/x;base64,
     creationTimestamp?: string;
-    labels?: Label[];
-    mainLink?: Link;
-    provider?: string;
-    serviceLevel?: ServiceLevel;
-    verification?: VerificationInfo;
+    serviceLevel?: string;
   };
 }
 
+export interface ProviderMetadataSpecData extends Record<string, unknown> {
+  verification?: VerificationInfo;
+  category?: string;
+  provider?: string;
+}
+
 export interface Link {
-  name: string;
   displayName?: string;
   url: string;
-  default?: boolean;
+  main?: boolean;
 }
 
 export interface DetailViewExtension {
   url: string;
-}
-
-export enum ServiceLevel {
-  VeryHigh = 'veryHigh24x7',
-  High = 'high24x5',
-  MediumOne = 'mediumOne16x5',
-  MediumTwo = 'mediumTwo12x5',
-  Low = 'low8x5',
 }
 
 export interface Documentation {

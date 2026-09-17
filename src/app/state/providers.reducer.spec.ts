@@ -14,6 +14,7 @@ const buildEntry = (name: string, displayName: string, apiBindingName?: string):
       spec: {
         displayName,
         description: `${name} description`,
+        tags: [],
       },
     },
   },

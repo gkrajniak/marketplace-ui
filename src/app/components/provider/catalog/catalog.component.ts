@@ -30,14 +30,10 @@ import {
   LayoutPanelTitleDirective,
 } from '@fundamental-ngx/core/layout-panel';
 import {
-  FdpSelectionChangeEvent,
   MultiComboboxSelectionChangeEvent,
   SuggestionItem,
 } from '@fundamental-ngx/platform';
-import {
-  MultiComboboxComponent,
-  SelectComponent,
-} from '@fundamental-ngx/platform/form';
+import { MultiComboboxComponent } from '@fundamental-ngx/platform/form';
 import { SearchFieldComponent } from '@fundamental-ngx/platform/search-field';
 import { EmptyCatalogComponent } from 'components/provider/catalog/empty-catalog/empty-catalog.component';
 import {
@@ -45,9 +41,10 @@ import {
   CatalogDataItem,
   Filter,
   InfoLabelFilter,
+  UiConfigFilter,
 } from 'models/index';
-import { CategoriesUtils } from 'services/categories.utils';
-import { ProvidersUtils } from 'services/providers.utils';
+import { CatalogFiltersUtils } from 'services/catalog-filters.utils';
+import { PmLuigiContextService } from 'services/luigi';
 
 @Component({
   selector: 'app-core-catalog',
@@ -64,7 +61,6 @@ import { ProvidersUtils } from 'services/providers.utils';
     LayoutPanelFooterComponent,
     CatalogItemComponent,
     EmptyCatalogComponent,
-    SelectComponent,
   ],
   templateUrl: './catalog.component.html',
   styleUrl: './catalog.component.scss',
@@ -72,6 +68,7 @@ import { ProvidersUtils } from 'services/providers.utils';
 })
 export class CatalogComponent implements OnInit, OnChanges {
   private route = inject(ActivatedRoute);
+  private pmLuigiContextService = inject(PmLuigiContextService);
 
   readonly title = input('Catalog', {
     transform: (value: undefined | string) => value ?? 'Catalog',
@@ -101,11 +98,6 @@ export class CatalogComponent implements OnInit, OnChanges {
    * Initial search filter value.
    */
   readonly initialFilter = input('');
-
-  /**
-   * Determines whether the category and provider filters should be displayed.
-   */
-  readonly filterHeader = input(false);
 
   /**
    * Title displayed when no search results are found.
@@ -146,6 +138,15 @@ export class CatalogComponent implements OnInit, OnChanges {
       .subscribe((queryParams: ParamMap) => {
         this.infoLabelFilters = this.buildInfoLabelFilters(queryParams);
       });
+
+    this.pmLuigiContextService
+      .contextObservable()
+      .pipe(takeUntilDestroyed())
+      .subscribe(({ context }) => {
+        this.filterConfigs = context.uiConfig?.filters ?? [];
+        this.buildFilterOptions();
+        this.filterData();
+      });
   }
 
   buildInfoLabelFilters(queryParams?: ParamMap): InfoLabelFilter[] | undefined {
@@ -163,11 +164,11 @@ export class CatalogComponent implements OnInit, OnChanges {
   }
 
   filteredData: CatalogDataItem[] = [];
-  categories: string[] = [];
-  providers: Filter[] = [];
+  filterConfigs: UiConfigFilter[] = [];
+  filterOptions: Record<string, Filter[]> = {};
   searchTerm = '';
   suggestions: SuggestionItem[] = new Array<SuggestionItem>();
-  filter: CardFilter = { category: 'All', providers: [] };
+  filter: CardFilter = {};
 
   ngOnChanges(changes: SimpleChanges) {
     const infoLabelChange = changes['infoLabelFilters'];
@@ -176,20 +177,32 @@ export class CatalogComponent implements OnInit, OnChanges {
       infoLabelChange ||
       (dataChange && dataChange.previousValue !== dataChange.currentValue)
     ) {
+      if (dataChange) {
+        this.buildFilterOptions();
+      }
       this.filterData();
     }
   }
 
   ngOnInit() {
     this.searchTerm = this.initialFilter();
+    this.buildFilterOptions();
     this.filterData();
     if (this.enableSuggestions()) {
       this.createSuggestions();
     }
-    if (this.filterHeader()) {
-      this.categories = CategoriesUtils.getCategories(this.data);
-      this.providers = ProvidersUtils.getProviders(this.data);
+  }
+
+  private buildFilterOptions(): void {
+    const options: Record<string, Filter[]> = {};
+    for (const config of this.filterConfigs) {
+      options[config.label] = CatalogFiltersUtils.getFilterOptions(
+        this.data,
+        config.providerMetadataPath,
+      );
+      this.filter[config.label] ??= [];
     }
+    this.filterOptions = options;
   }
 
   private filterData() {
@@ -231,20 +244,21 @@ export class CatalogComponent implements OnInit, OnChanges {
   }
 
   filterCards(): void {
-    this.filteredData = this.filteredData.filter(
-      (el) =>
-        CategoriesUtils.filterByCategory(this.filter, el) &&
-        ProvidersUtils.filterByProviders(this.filter, el),
+    this.filteredData = this.filteredData.filter((el) =>
+      this.filterConfigs.every((config) =>
+        CatalogFiltersUtils.matches(
+          this.filter[config.label],
+          CatalogFiltersUtils.getByPath(
+            el.providerMetadata,
+            config.providerMetadataPath,
+          ),
+        ),
+      ),
     );
   }
 
-  setCategoryFilter($event: FdpSelectionChangeEvent) {
-    this.filter.category = $event.payload as string;
-    this.filterData();
-  }
-
-  setProvidersFilter(item: MultiComboboxSelectionChangeEvent) {
-    this.filter.providers = item.selectedItems;
+  setFilter(label: string, event: MultiComboboxSelectionChangeEvent): void {
+    this.filter[label] = event.selectedItems;
     this.filterData();
   }
 }

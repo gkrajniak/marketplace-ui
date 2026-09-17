@@ -72,8 +72,6 @@ export const getMarketplaceEntriesQuery = gql`
               }
               providerMetadata {
                 spec {
-                  category
-                  type
                   serviceLevel
                   contacts {
                     displayName
@@ -97,14 +95,11 @@ export const getMarketplaceEntriesQuery = gql`
                       data
                     }
                   }
-                  labels {
-                    title
-                    color
-                    glyph
-                  }
-                  mainLink {
+                  tags
+                  links {
                     displayName
                     url
+                    main
                   }
                   preferredSupportChannels {
                     url
@@ -112,12 +107,6 @@ export const getMarketplaceEntriesQuery = gql`
                   }
                   detailViewExtensions {
                     url
-                  }
-                  verification {
-                    label
-                    status
-                    icon
-                    hint
                   }
                 }
               }

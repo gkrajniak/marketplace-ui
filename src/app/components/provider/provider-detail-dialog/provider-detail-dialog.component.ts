@@ -37,10 +37,11 @@ import { VerificationInfoComponent } from 'components/provider/verification-info
 import { PROVIDER_INSTANCE_INSTALLED } from 'models/luigi-go-back';
 import {
   Contact,
+  Label,
   Link,
   ProviderMetadata,
-  ServiceLevel,
 } from 'models/provider-metadata';
+import { VerificationInfo } from 'models/verification-info';
 import { Observable, Subscription, combineLatest } from 'rxjs';
 import { filter, mergeMap, tap } from 'rxjs/operators';
 import { LuigiClient, PmLuigiContextService } from 'services/luigi';
@@ -150,7 +151,7 @@ export class ProviderDetailDialogComponent implements OnInit, OnDestroy {
     this.providerSubscription?.unsubscribe();
   }
 
-  mapServiceLevel(serviceLevel: ServiceLevel): string {
+  mapServiceLevel(serviceLevel?: string): string {
     return this.providerService.mapServiceLevel(serviceLevel);
   }
 
@@ -207,6 +208,24 @@ export class ProviderDetailDialogComponent implements OnInit, OnDestroy {
 
   protected getIcon(extension: ProviderMetadata): string {
     return this.providerService.getIcon(extension);
+  }
+
+  protected getVerification(
+    extension: ProviderMetadata,
+  ): VerificationInfo | undefined {
+    return this.providerService.getVerification(extension);
+  }
+
+  protected getMainLink(extension: ProviderMetadata): Link | undefined {
+    return this.providerService.getMainLink(extension);
+  }
+
+  protected getLabels(extension: ProviderMetadata): Label[] {
+    return this.providerService.buildLabels(extension);
+  }
+
+  protected getCategory(extension: ProviderMetadata): string | undefined {
+    return this.providerService.getCategory(extension);
   }
 
   protected goToExternalLink(URL: string | undefined): void {

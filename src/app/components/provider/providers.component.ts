@@ -91,10 +91,12 @@ export class ProvidersComponent implements OnInit {
             const labels = this.providerService.buildLabels(
               marketplaceEntry.spec.providerMetadata,
             );
+            const provider = this.providerService.getProvider(
+              marketplaceEntry.spec.providerMetadata,
+            );
 
             total.push({
               id: marketplaceEntry.metadata.name,
-              type: marketplaceEntry.spec.providerMetadata.spec.type,
               testId: `app-extensions-catalog-all-card-${marketplaceEntry.metadata.name}-entity`,
               title: marketplaceEntry.spec.providerMetadata.spec.displayName,
               description:
@@ -102,10 +104,11 @@ export class ProvidersComponent implements OnInit {
               image: this.providerService.getIcon(
                 marketplaceEntry.spec.providerMetadata,
               ),
-              verification:
-                marketplaceEntry.spec.providerMetadata.spec.verification,
-              category: marketplaceEntry.spec.providerMetadata.spec.category,
-              provider: marketplaceEntry.spec.providerMetadata.spec.provider,
+              verification: this.providerService.getVerification(
+                marketplaceEntry.spec.providerMetadata,
+              ),
+              provider,
+              providerMetadata: marketplaceEntry.spec.providerMetadata,
               badge: {
                 text: badge,
                 status: 'neutral',
@@ -167,10 +170,11 @@ export class ProvidersComponent implements OnInit {
     providerMetadata: ProviderMetadata,
   ): AdditionalInfo[] {
     const additionalInfo: AdditionalInfo[] = [];
-    if (providerMetadata.spec.category) {
+    const category = this.providerService.getCategory(providerMetadata);
+    if (category) {
       additionalInfo.push({
         label: 'Category',
-        value: providerMetadata.spec.category,
+        value: category,
       });
     }
     return additionalInfo;

@@ -5,12 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { ILuigiContextTypes } from '@luigi-project/client-support-angular';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { ConfirmationDialogDecision } from 'models/dialog';
-import {
-  Label,
-  MarketplaceEntry,
-  ProviderMetadata,
-  ServiceLevel,
-} from 'models/index';
+import { Label, MarketplaceEntry, ProviderMetadata } from 'models/index';
 import { PROVIDER_INSTANCE_INSTALLED } from 'models/luigi-go-back';
 import { MockProvider } from 'ng-mocks';
 import { Subject, of } from 'rxjs';
@@ -26,6 +21,7 @@ const buildProviderMetadata = (
   spec: {
     displayName: 'Test Provider',
     description: 'A test provider',
+    tags: [],
     ...overrides,
   },
 });
@@ -218,7 +214,7 @@ describe('ProviderService', () => {
       const result = await service.uninstallProviderInstanceDialog(
         buildMarketplaceEntry('test-provider-abc12', {
           displayName: 'Test Provider',
-          provider: 'some-provider',
+          data: { provider: 'some-provider' },
         }),
       );
 
@@ -295,6 +291,130 @@ describe('ProviderService', () => {
     });
   });
 
+  describe('getVerification', () => {
+    it('should return undefined when data is absent', () => {
+      const provider = buildProviderMetadata({});
+      expect(service.getVerification(provider)).toBeUndefined();
+    });
+
+    it('should parse verification from a JSON string data field', () => {
+      const provider = buildProviderMetadata({
+        data: JSON.stringify({
+          verification: { label: 'Verified', status: 'positive' },
+        }),
+      });
+      expect(service.getVerification(provider)).toEqual({
+        label: 'Verified',
+        status: 'positive',
+      });
+    });
+
+    it('should read verification from an already-parsed data object', () => {
+      const provider = buildProviderMetadata({
+        data: { verification: { label: 'Certified', status: 'positive' } },
+      });
+      expect(service.getVerification(provider)).toEqual({
+        label: 'Certified',
+        status: 'positive',
+      });
+    });
+
+    it('should return undefined when data has no verification', () => {
+      const provider = buildProviderMetadata({
+        data: JSON.stringify({ someOtherField: true }),
+      });
+      expect(service.getVerification(provider)).toBeUndefined();
+    });
+  });
+
+  describe('getCategory', () => {
+    it('should return undefined when data is absent', () => {
+      const provider = buildProviderMetadata({});
+      expect(service.getCategory(provider)).toBeUndefined();
+    });
+
+    it('should parse category from a JSON string data field', () => {
+      const provider = buildProviderMetadata({
+        data: JSON.stringify({ category: 'Sandbox' }),
+      });
+      expect(service.getCategory(provider)).toBe('Sandbox');
+    });
+
+    it('should read category from an already-parsed data object', () => {
+      const provider = buildProviderMetadata({
+        data: { category: 'Integrations' },
+      });
+      expect(service.getCategory(provider)).toBe('Integrations');
+    });
+
+    it('should return undefined when data has no category', () => {
+      const provider = buildProviderMetadata({
+        data: JSON.stringify({ someOtherField: true }),
+      });
+      expect(service.getCategory(provider)).toBeUndefined();
+    });
+  });
+
+  describe('getProvider', () => {
+    it('should return undefined when data is absent', () => {
+      const provider = buildProviderMetadata({});
+      expect(service.getProvider(provider)).toBeUndefined();
+    });
+
+    it('should parse provider from a JSON string data field', () => {
+      const provider = buildProviderMetadata({
+        data: JSON.stringify({ provider: 'ACME' }),
+      });
+      expect(service.getProvider(provider)).toBe('ACME');
+    });
+
+    it('should read provider from an already-parsed data object', () => {
+      const provider = buildProviderMetadata({
+        data: { provider: 'ACME' },
+      });
+      expect(service.getProvider(provider)).toBe('ACME');
+    });
+
+    it('should return undefined when data has no provider', () => {
+      const provider = buildProviderMetadata({
+        data: JSON.stringify({ someOtherField: true }),
+      });
+      expect(service.getProvider(provider)).toBeUndefined();
+    });
+  });
+
+  describe('getMainLink', () => {
+    it('should return undefined when there are no links', () => {
+      const provider = buildProviderMetadata({});
+      expect(service.getMainLink(provider)).toBeUndefined();
+    });
+
+    it('should return undefined when no link is marked as main', () => {
+      const provider = buildProviderMetadata({
+        links: [{ displayName: 'Docs', url: 'https://example.com/docs' }],
+      });
+      expect(service.getMainLink(provider)).toBeUndefined();
+    });
+
+    it('should return the link marked as main', () => {
+      const provider = buildProviderMetadata({
+        links: [
+          { displayName: 'Docs', url: 'https://example.com/docs' },
+          {
+            displayName: 'Open',
+            url: 'https://example.com',
+            main: true,
+          },
+        ],
+      });
+      expect(service.getMainLink(provider)).toEqual({
+        displayName: 'Open',
+        url: 'https://example.com',
+        main: true,
+      });
+    });
+  });
+
   describe('navigateToProviderDetails', () => {
     it('should open the provider as a sibling in the current marketplace', () => {
       service.navigateToProviderDetails(
@@ -310,7 +430,7 @@ describe('ProviderService', () => {
   });
 
   describe('buildLabels', () => {
-    it('should return empty array when no labels and not new', () => {
+    it('should return empty array when no tags and not new', () => {
       const provider = buildProviderMetadata({
         creationTimestamp: '2020-01-01T00:00:00Z',
       });
@@ -322,7 +442,7 @@ describe('ProviderService', () => {
       recentDate.setMonth(recentDate.getMonth() - 1);
       const provider = buildProviderMetadata({
         creationTimestamp: recentDate.toISOString(),
-        labels: [],
+        tags: [],
       });
       const labels = service.buildLabels(provider);
       expect(labels[0]).toEqual(NEW_LABEL);
@@ -333,38 +453,47 @@ describe('ProviderService', () => {
       oldDate.setMonth(oldDate.getMonth() - 4);
       const provider = buildProviderMetadata({
         creationTimestamp: oldDate.toISOString(),
-        labels: [],
+        tags: [],
       });
       const labels = service.buildLabels(provider);
       expect(labels).toEqual([]);
     });
 
-    it('should compute ColorCategory from label title if no color set', () => {
+    it('should build a label with a derived color for each tag', () => {
       const provider = buildProviderMetadata({
-        labels: [{ title: 'beta', color: undefined as any }],
+        tags: ['beta'],
       });
       const labels = service.buildLabels(provider);
+      expect(labels[0].title).toBe('beta');
       expect(labels[0].color).toBeTruthy();
     });
 
-    it('should use explicit label color when provided', () => {
+    it('should build a label for every tag in order', () => {
       const provider = buildProviderMetadata({
-        labels: [{ title: 'SAP', color: '5' }],
+        tags: ['SAP', 'partner'],
       });
       const labels = service.buildLabels(provider);
-      expect(labels[0].color).toBe('5');
+      expect(labels.map((l) => l.title)).toEqual(['SAP', 'partner']);
     });
   });
 
   describe('mapServiceLevel', () => {
     it.each([
-      [ServiceLevel.VeryHigh, '24x7'],
-      [ServiceLevel.High, '24x5'],
-      [ServiceLevel.MediumOne, '16x5'],
-      [ServiceLevel.MediumTwo, '12x5'],
-      [ServiceLevel.Low, '8x5'],
+      ['veryHigh24x7', '24x7'],
+      ['high24x5', '24x5'],
+      ['mediumOne16x5', '16x5'],
+      ['mediumTwo12x5', '12x5'],
+      ['low8x5', '8x5'],
     ])('should map %s to %s', (serviceLevel, expected) => {
       expect(service.mapServiceLevel(serviceLevel)).toBe(expected);
+    });
+
+    it('should return undefined values as an empty string', () => {
+      expect(service.mapServiceLevel(undefined)).toBe('');
+    });
+
+    it('should pass through an unrecognized value', () => {
+      expect(service.mapServiceLevel('customTier')).toBe('customTier');
     });
   });
 

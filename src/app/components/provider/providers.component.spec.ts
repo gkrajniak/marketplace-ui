@@ -12,7 +12,7 @@ import { take } from 'rxjs/operators';
 import { LuigiClient, PmLuigiContextService } from 'services/luigi';
 import { ProviderService } from 'services/provider.service';
 import { selectAllProviders } from 'state/providers.selectors';
-import { MarketplaceEntry } from 'models/provider-metadata';
+import { MarketplaceEntry, ProviderMetadata } from 'models/provider-metadata';
 
 function buildMarketplaceEntry(opts: {
   name?: string;
@@ -20,6 +20,7 @@ function buildMarketplaceEntry(opts: {
   displayName?: string;
   description?: string;
   category?: string;
+  provider?: string;
 } = {}): MarketplaceEntry {
   return {
     metadata: { name: opts.name ?? 'test-ext' },
@@ -36,7 +37,11 @@ function buildMarketplaceEntry(opts: {
         spec: {
           displayName: opts.displayName ?? 'Test Extension',
           description: opts.description ?? 'A description',
-          category: opts.category,
+          data:
+            opts.category || opts.provider
+              ? { category: opts.category, provider: opts.provider }
+              : undefined,
+          tags: [],
         },
       },
     },
@@ -62,6 +67,15 @@ describe('ExtensionAllComponent', () => {
         MockProvider(ProviderService, {
           buildLabels: vi.fn().mockReturnValue(undefined),
           getIcon: vi.fn().mockReturnValue(undefined),
+          getVerification: vi.fn().mockReturnValue(undefined),
+          getCategory: vi.fn(
+            (provider: ProviderMetadata) =>
+              (provider.spec.data as { category?: string })?.category,
+          ),
+          getProvider: vi.fn(
+            (provider: ProviderMetadata) =>
+              (provider.spec.data as { provider?: string })?.provider,
+          ),
         }),
         MockProvider(PmLuigiContextService, {
           contextObservable: vi.fn().mockReturnValue(contextSubject),
@@ -132,6 +146,35 @@ describe('ExtensionAllComponent', () => {
       store.refreshState();
 
       expect(emitted[0].badge.text).toBe('');
+    });
+
+    it('should set the catalog item provider from the provider service', () => {
+      let emitted: any[] = [];
+      component.installableProviders.pipe(take(1)).subscribe((items) => {
+        emitted = items;
+      });
+
+      store.overrideSelector(selectAllProviders, [
+        buildMarketplaceEntry({ provider: 'ACME' }),
+      ]);
+      store.refreshState();
+
+      expect(emitted[0].provider).toBe('ACME');
+    });
+
+    it('should carry the raw providerMetadata for downstream filtering', () => {
+      let emitted: any[] = [];
+      component.installableProviders.pipe(take(1)).subscribe((items) => {
+        emitted = items;
+      });
+
+      const entry = buildMarketplaceEntry({ category: 'MyCategory' });
+      store.overrideSelector(selectAllProviders, [entry]);
+      store.refreshState();
+
+      expect(emitted[0].providerMetadata).toBe(
+        entry.spec.providerMetadata,
+      );
     });
 
     it('should include additionalInfo with Category when category is set', () => {

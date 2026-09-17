@@ -10,5 +10,12 @@ describe('getMarketplaceEntriesQuery', () => {
     expect(query).toContain('displayName');
     expect(query).toContain('detailViewExtensions {');
     expect(query).toContain('url');
+    expect(query).toContain('links {');
+    expect(query).toContain('main');
+    expect(query).not.toContain('mainLink');
+    expect(query).toContain('tags');
+    expect(query).not.toContain('labels {');
+    expect(query).not.toContain('category');
+    expect(query).not.toContain('type');
   });
 });

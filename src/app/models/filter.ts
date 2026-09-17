@@ -1,7 +1,4 @@
-export interface CardFilter {
-  category?: string;
-  providers: Filter[];
-}
+export type CardFilter = Record<string, Filter[]>;
 
 export interface Filter {
   label: string;

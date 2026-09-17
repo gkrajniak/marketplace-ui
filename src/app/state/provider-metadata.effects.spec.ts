@@ -7,11 +7,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Action } from '@ngrx/store';
-import { Label, MarketplaceEntry } from 'models/provider-metadata';
+import { MarketplaceEntry } from 'models/provider-metadata';
 import { MockProvider } from 'ng-mocks';
 import { ReplaySubject, of, throwError } from 'rxjs';
 import { GraphqlService } from 'services/graphql.service';
-import { ProviderService } from 'services/provider.service';
 import { requestFailed } from 'state/common.action';
 import { retrievedProviders } from 'state/providers.actions';
 
@@ -29,7 +28,7 @@ const buildMarketplaceEntry = (): MarketplaceEntry => ({
       spec: {
         displayName: 'Test Provider',
         description: 'A test provider',
-        labels: [],
+        tags: [],
       },
     },
   },
@@ -39,7 +38,6 @@ describe('ProviderMetadataEffects', () => {
   let effects: ProviderMetadataEffects;
   let actions$: ReplaySubject<Action>;
   let graphqlService: GraphqlService;
-  let providerService: ProviderService;
 
   beforeEach(() => {
     actions$ = new ReplaySubject<Action>(1);
@@ -50,15 +48,11 @@ describe('ProviderMetadataEffects', () => {
         MockProvider(GraphqlService, {
           getMarketplaceEntries: vi.fn(),
         }),
-        MockProvider(ProviderService, {
-          buildLabels: vi.fn().mockReturnValue([]),
-        }),
       ],
     });
 
     effects = TestBed.inject(ProviderMetadataEffects);
     graphqlService = TestBed.inject(GraphqlService);
-    providerService = TestBed.inject(ProviderService);
   });
 
   describe('loadProviderMetadata', () => {
@@ -97,12 +91,10 @@ describe('ProviderMetadataEffects', () => {
 
     it('should expose all providers before the selected provider', () => {
       const entry = buildMarketplaceEntry();
-      const labels: Label[] = [{ title: 'New', color: '6' }];
 
       vi.spyOn(graphqlService, 'getMarketplaceEntries').mockReturnValue(
         of([entry]),
       );
-      vi.spyOn(providerService, 'buildLabels').mockReturnValue(labels);
 
       actions$.next(loadProviderMetadata({ providerName: 'test-provider' }));
 
@@ -113,16 +105,7 @@ describe('ProviderMetadataEffects', () => {
 
       expect(emittedActions).toEqual([
         retrievedProviders({ providers: [entry] }),
-        retrievedProviderMetadata({
-          marketplaceEntry: expect.objectContaining({
-            metadata: { name: 'test-provider' },
-            spec: expect.objectContaining({
-              providerMetadata: expect.objectContaining({
-                spec: expect.objectContaining({ labels }),
-              }),
-            }),
-          }),
-        }),
+        retrievedProviderMetadata({ marketplaceEntry: entry }),
       ]);
     });
 

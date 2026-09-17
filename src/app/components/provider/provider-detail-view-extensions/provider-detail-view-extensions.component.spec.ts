@@ -14,6 +14,7 @@ const provider = (name: string, url?: string): MarketplaceEntry => ({
     providerMetadata: {
       spec: {
         displayName: name,
+        tags: [],
         detailViewExtensions: url ? [{ url }] : [],
       },
     },

@@ -10,10 +10,12 @@ import { PROVIDER_INSTANCE_INSTALLED } from 'models/luigi-go-back';
 import {
   ColorCategory,
   Label,
+  Link,
   MarketplaceEntry,
   ProviderMetadata,
-  ServiceLevel,
+  ProviderMetadataSpecData,
 } from 'models/provider-metadata';
+import { VerificationInfo } from 'models/verification-info';
 import { filter, take } from 'rxjs/operators';
 import { GraphqlService } from 'services/graphql.service';
 import { NotificationService } from 'services/notification.service';
@@ -63,8 +65,9 @@ export class ProviderService {
       .pipe(take(1))
       .subscribe((ctx) => {
         triggerMatomoEvent('providerUninstalled', {
-          providerProvider:
-            marketplaceEntry.spec.providerMetadata.spec.provider,
+          providerProvider: this.getProvider(
+            marketplaceEntry.spec.providerMetadata,
+          ),
           providerName: marketplaceEntry.metadata.name,
           projectType: ctx.context.entityContext?.project?.type,
           projectId: ctx.context.projectId,
@@ -141,6 +144,31 @@ export class ProviderService {
     return provider.spec.image ?? '';
   }
 
+  public getVerification(provider: ProviderMetadata): VerificationInfo | undefined {
+    return this.parseSpecData(provider.spec.data)?.verification;
+  }
+
+  public getCategory(provider: ProviderMetadata): string | undefined {
+    return this.parseSpecData(provider.spec.data)?.category;
+  }
+
+  public getProvider(provider: ProviderMetadata): string | undefined {
+    return this.parseSpecData(provider.spec.data)?.provider;
+  }
+
+  public getMainLink(provider: ProviderMetadata): Link | undefined {
+    return provider.spec.links?.find((link) => link.main);
+  }
+
+  private parseSpecData(
+    data: string | ProviderMetadataSpecData | undefined,
+  ): ProviderMetadataSpecData | undefined {
+    if (!data) {
+      return undefined;
+    }
+    return typeof data === 'string' ? JSON.parse(data) : data;
+  }
+
   navigateToProviderDetails(marketplaceEntry: MarketplaceEntry): void {
     const title = `Provider Details - ${marketplaceEntry.spec.providerMetadata.spec.displayName}`;
     void this.luigiClient
@@ -154,9 +182,9 @@ export class ProviderService {
 
   buildLabels(elem: ProviderMetadata): Label[] {
     const labels =
-      elem.spec.labels?.map((l) => ({
-        title: l.title,
-        color: l.color || this.mapToColorCategory(l.title),
+      elem.spec.tags?.map((tag) => ({
+        title: tag,
+        color: this.mapToColorCategory(tag),
       })) || [];
 
     if (this.isNew(elem)) {
@@ -166,18 +194,20 @@ export class ProviderService {
     return labels;
   }
 
-  mapServiceLevel(serviceLevel: ServiceLevel): string {
+  mapServiceLevel(serviceLevel?: string): string {
     switch (serviceLevel) {
-      case ServiceLevel.VeryHigh:
+      case 'veryHigh24x7':
         return '24x7';
-      case ServiceLevel.High:
+      case 'high24x5':
         return '24x5';
-      case ServiceLevel.MediumOne:
+      case 'mediumOne16x5':
         return '16x5';
-      case ServiceLevel.MediumTwo:
+      case 'mediumTwo12x5':
         return '12x5';
-      case ServiceLevel.Low:
+      case 'low8x5':
         return '8x5';
+      default:
+        return serviceLevel ?? '';
     }
   }
 
